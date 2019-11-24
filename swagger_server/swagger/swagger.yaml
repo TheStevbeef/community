@@ -1,0 +1,193 @@
+openapi: 3.0.0
+info:
+  title: Community Service
+  description: This is an API for posting blogposts
+  contact:
+    email: stefan.moedl@audi.de
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: http://localhost:8080/
+  description: localhost
+paths:
+  /posts:
+    get:
+      description: Get posts
+      operationId: posts_get
+      parameters:
+      - name: limit
+        in: query
+        description: The amount of posts returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        description: The Offset of the returning list
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successfull pull of posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+    post:
+      description: post post
+      operationId: posts_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWithoutTimeAndId'
+        required: true
+      responses:
+        "201":
+          description: Successfull post of post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+  /posts/{id}:
+    get:
+      description: Obtain information about specific post
+      operationId: posts_id_get
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the post
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 12ab
+      responses:
+        "200":
+          description: successfull get of specific post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        "404":
+          description: Post with the specified ID not found
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+    delete:
+      description: Obtain information about specific post
+      operationId: posts_id_delete
+      parameters:
+      - name: id
+        in: path
+        description: The ID of the post
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: 12ab
+      responses:
+        "200":
+          description: Successfull delete of posts id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+      x-openapi-router-controller: swagger_server.controllers.default_controller
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ab12
+        name:
+          type: string
+          example: Kevin
+        image_url:
+          type: string
+          format: base64
+          example: https://i.pravatar.cc/150?u=abc12345
+      description: Model containing an user
+      example:
+        image_url: https://i.pravatar.cc/150?u=abc12345
+        name: Kevin
+        id: ab12
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          example: asd4
+        timestamp:
+          type: string
+          format: date
+        user:
+          $ref: '#/components/schemas/User'
+        message:
+          maxLength: 140
+          minLength: 0
+          type: string
+        media:
+          $ref: '#/components/schemas/Media'
+      description: Model containing a post
+      example:
+        id: asd4
+        media:
+          content_type: image/jpeg
+          url: https:picsum.photos/id/6/300
+        message: message
+        user:
+          image_url: https://i.pravatar.cc/150?u=abc12345
+          name: Kevin
+          id: ab12
+        timestamp: 2000-01-23
+    Posts:
+      type: array
+      description: Model containing an array of posts
+      items:
+        $ref: '#/components/schemas/Post'
+    PostWithoutTimeAndId:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        message:
+          maxLength: 140
+          minLength: 0
+          type: string
+        media:
+          $ref: '#/components/schemas/Media'
+      description: Model containing a post
+    Media:
+      type: object
+      properties:
+        content_type:
+          type: string
+          example: image/jpeg
+        url:
+          type: string
+          format: base64
+          example: https:picsum.photos/id/6/300
+      example:
+        content_type: image/jpeg
+        url: https:picsum.photos/id/6/300
+    inline_response_200:
+      type: object
+      properties:
+        id:
+          type: string
+          example: Delete was successfull
+      example:
+        id: Delete was successfull
+
